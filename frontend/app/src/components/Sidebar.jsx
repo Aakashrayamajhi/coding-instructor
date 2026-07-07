@@ -7,9 +7,9 @@ export default function Sidebar({ setSidebarOpen }) {
     <>
       <div style={{display:'flex', alignItems:'center', gap:12}}>
         <div className="logo" style={{display:'flex', alignItems:'center', gap:12}}>
-          <div className="badge">CI</div>
+          <div className="badge">SKY</div>
           <div style={{display:'flex', flexDirection:'column'}}>
-            <h1>DSA Mentor AI</h1>
+            <h1>DSA Mentor</h1>
             <p style={{margin:0, fontSize:12, color:'var(--sub)'}}>Technical Mastery</p>
           </div>
         </div>

@@ -6,8 +6,8 @@
   --bg:#0b0b0c;
   --panel:#0e0f11;
   --muted:#232429;
-  --accent-1:#ff3b3b;
-  --accent-2:#ff7b7b;
+  --accent-1:#ffffff;
+  --accent-2:#9c9c9c;
   --text:#e9edef;
   --sub:#9aa0a6;
   --radius:12px;
@@ -270,7 +270,7 @@ body{
 .code-overlay{
   position:fixed;
   inset:0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.747);
   z-index:120;
   display:flex;
   align-items:flex-end;

@@ -5,25 +5,62 @@ import axios from "axios";
 import Message from "./Message";
 import InputBox from "./InputBox";
 
+const API_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:3000/ask'
+    : '/ask';
+
 export default function ChatSection({ setSidebarOpen, setCodeOpen }) {
   const [text, setText] = useState('');
   const [msgs, setMsgs] = useState([
-    { id: 1, who: 'ai', text: "Hello Alex! Today we're tackling Level Order Traversal..." },
-    { id: 2, who: 'user', text: 'Can you explain space complexity?' }
+    { id: 1, who: 'ai', text: "Hello Aakash! Today we're tackling Level Order Traversal..." },
+    { id: 2, who: 'user', text: 'Can you explain time and space complexity?' }
   ]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const listRef = useRef(null);
 
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [msgs]);
 
-  function send(){
-    const v = text.trim();
-    if (!v) return;
-    const userMsg = { id: Date.now(), who: 'user', text: v };
-    setMsgs(m => [...m, userMsg]);
+  async function send(){
+    const prompt = text.trim();
+    if (!prompt) return;
+
+    setError('');
+    setLoading(true);
     setText('');
-    setTimeout(() => setMsgs(m => [...m, { id: Date.now()+1, who: 'ai', text: 'Short answer: O(n) extra for the queue.' }]), 600);
+
+    const userMessage = { id: Date.now(), who: 'user', text: prompt };
+    setMsgs(prev => [...prev, userMessage]);
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Server error');
+      }
+
+      setMsgs(prev => [
+        ...prev,
+        { id: Date.now() + 1, who: 'ai', text: data.reply || 'No reply from server.' }
+      ]);
+    } catch (err) {
+      setError(err.message || 'Unable to send message');
+      setMsgs(prev => [
+        ...prev,
+        { id: Date.now() + 2, who: 'ai', text: 'Sorry, I could not reach the server.' }
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -48,17 +85,31 @@ export default function ChatSection({ setSidebarOpen, setCodeOpen }) {
         ))}
       </div>
 
+      {error && (
+        <div style={{ padding: '0 18px 10px', color: '#ff8b8b', fontSize: '13px' }}>
+          {error}
+        </div>
+      )}
+
       <div className="chat-input">
         <textarea
           placeholder="Ask a question..."
           aria-label="Message"
           value={text}
           onChange={e => setText(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              send();
+            }
+          }}
+          disabled={loading}
         />
         <div className="actions">
           <div className="send-hint">Try: "Explain space complexity"</div>
-          <button className="send" onClick={send} aria-label="Send">Send</button>
+          <button className="send" onClick={send} disabled={loading}>
+            {loading ? 'Sending...' : 'Send'}
+          </button>
         </div>
       </div>
     </>
